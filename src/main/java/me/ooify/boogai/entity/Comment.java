@@ -28,7 +28,7 @@ public class Comment {
 
     private String content;
 
-    private Double star;
+    private Integer star;
 
     private Integer like;
 

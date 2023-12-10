@@ -9,7 +9,9 @@ import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 import me.ooify.boogai.dto.user.RegisterDTO;
 import me.ooify.boogai.dto.user.UserInfoDTO;
+import me.ooify.boogai.entity.Cart;
 import me.ooify.boogai.entity.User;
+import me.ooify.boogai.service.impl.CartServiceImpl;
 import me.ooify.boogai.service.impl.UserServiceImpl;
 import me.ooify.boogai.utils.Result;
 import org.modelmapper.ModelMapper;
@@ -34,6 +36,8 @@ import java.util.Objects;
 public class UserController {
     @Resource
     private UserServiceImpl userService;
+    @Resource
+    private CartServiceImpl cartService;
     @Resource
     private ModelMapper modelMapper;
 
@@ -124,6 +128,7 @@ public class UserController {
     @DeleteMapping("/{id}")
     public Result deleteUser(@PathVariable Long id) {
         if (userService.removeById(id)) {
+            cartService.remove(new QueryWrapper<Cart>().eq("user_id", id));
             return Result.ok("删除成功");
         } else {
             return Result.error("删除失败");

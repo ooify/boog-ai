@@ -1,8 +1,8 @@
 package me.ooify.boogai.controller;
 
+import cn.dev33.satoken.annotation.SaCheckRole;
 import cn.dev33.satoken.stp.StpUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
@@ -16,7 +16,10 @@ import me.ooify.boogai.service.impl.UserServiceImpl;
 import me.ooify.boogai.utils.Result;
 import org.modelmapper.ModelMapper;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Objects;
 
 import static net.sf.jsqlparser.parser.feature.Feature.comment;
 
@@ -51,7 +54,7 @@ public class CommentController {
     public Result getCommentsByBookId(@RequestParam(value = "pageNum", defaultValue = "1") Integer pageNum,
                                       @RequestParam(value = "pageSize", defaultValue = "10") Integer pageSize,
                                       @RequestParam(value = "sortField", defaultValue = "created_at") String sortField,
-                                      @RequestParam(value = "bookId") String bookId) {
+                                      @RequestParam(value = "bookId") Long bookId) {
         pageNum = Math.max(1, pageNum);
         pageSize = Math.max(1, pageSize);
         if (!sortField.equals("created_at") && !sortField.equals("hot")) {
@@ -87,9 +90,39 @@ public class CommentController {
         return Result.ok("查询成功")
                 .setData(commentService.page(page, queryWrapper));
     }
+    @SaCheckRole("admin")
+    @GetMapping("/list")
+    public Result getComments(@RequestParam(value = "pageNum", defaultValue = "1") Integer pageNum,
+                              @RequestParam(value = "pageSize", defaultValue = "10") Integer pageSize,
+                              @RequestParam(value = "bookId", required = false) Long bookId,
+                              @RequestParam(value = "userId", required = false) Long userId,
+                              @RequestParam(value = "star", required = false) Integer star,
+                              @RequestParam(value = "sortField", defaultValue = "created_at") String sortField,
+                              @RequestParam(value = "sortOrder", defaultValue = "desc") String sortOrder) {
+        pageNum = Math.max(1, pageNum);
+        pageSize = Math.max(1, pageSize);
+        if (!sortField.equals("created_at") && !sortField.equals("hot") && !sortField.equals("star") && !sortField.equals("like")) {
+            sortField = "created_at";
+        }
+        if (!sortOrder.equals("desc") && !sortOrder.equals("asc")) {
+            sortOrder = "desc";
+        }
+        Page<Comment> page = new Page<>(pageNum, pageSize);
+        QueryWrapper<Comment> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq(bookId != null, "book_id", bookId)
+                .eq(userId != null, "user_id", userId)
+                .eq(star != null, "star", star)
+                .orderByAsc("asc".equalsIgnoreCase(sortOrder), sortField)
+                .orderByDesc("desc".equalsIgnoreCase(sortOrder), sortField);
+        return Result.ok("查询成功")
+                .setData(commentService.page(page, queryWrapper));
+    }
 
     @PostMapping
-    public Result addComment(@Valid @RequestBody CommentDTO commentDTO) {
+    public Result addComment(@Valid @RequestBody CommentDTO commentDTO, BindingResult bindingResult) {
+        if (bindingResult.hasErrors()) {
+            return Result.error(Objects.requireNonNull(bindingResult.getFieldError()).getDefaultMessage());
+        }
         Comment comment = modelMapper.map(commentDTO, Comment.class);
         if (commentService.getOne(new QueryWrapper<Comment>().eq("book_id", comment.getBookId())) == null) {
             return Result.error("书籍不存在");
