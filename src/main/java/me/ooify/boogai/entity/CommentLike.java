@@ -2,13 +2,16 @@ package me.ooify.boogai.entity;
 
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
-import java.util.Date;
+import com.baomidou.mybatisplus.annotation.TableName;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-import lombok.*;
+import java.util.Date;
 
 /**
  * <p>
- * 
+ *
  * </p>
  *
  * @author jonsan
@@ -17,20 +20,15 @@ import lombok.*;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class Comment {
+@TableName("comment_like")
+public class CommentLike {
 
     @TableId(value = "id", type = IdType.AUTO)
     private Long id;
 
+    private Long commentId;
+
     private Long userId;
-
-    private Long bookId;
-
-    private String content;
-
-    private Integer star;
-
-    private Integer likes;
 
     private Date createdAt;
 }

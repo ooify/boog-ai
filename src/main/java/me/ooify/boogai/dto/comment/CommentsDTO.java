@@ -15,6 +15,6 @@ public class CommentsDTO {
     private String bookId;
     private CommentUserDTO user;
     private String content;
-    private Integer like;
+    private Integer likes;
     private Date createdAt;
 }

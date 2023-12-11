@@ -9,8 +9,10 @@ import jakarta.validation.Valid;
 import me.ooify.boogai.dto.comment.CommentDTO;
 import me.ooify.boogai.dto.comment.CommentsDTO;
 import me.ooify.boogai.dto.user.CommentUserDTO;
+import me.ooify.boogai.entity.Book;
 import me.ooify.boogai.entity.Comment;
 
+import me.ooify.boogai.service.impl.BookServiceImpl;
 import me.ooify.boogai.service.impl.CommentServiceImpl;
 import me.ooify.boogai.service.impl.UserServiceImpl;
 import me.ooify.boogai.utils.Result;
@@ -37,13 +39,16 @@ import static net.sf.jsqlparser.parser.feature.Feature.comment;
 @RequestMapping("/comment")
 public class CommentController {
     @Resource
-    CommentServiceImpl commentService;
+    private CommentServiceImpl commentService;
     @Resource
-    UserServiceImpl userService;
+    private UserServiceImpl userService;
+    @Resource
+    private BookServiceImpl bookService;
     @Resource
     private ModelMapper modelMapper;
 
 
+    @SaCheckRole("admin")
     @GetMapping("/{id}")
     public Result getCommentById(@PathVariable Long id) {
         return Result.ok("查询成功")
@@ -57,7 +62,7 @@ public class CommentController {
                                       @RequestParam(value = "bookId") Long bookId) {
         pageNum = Math.max(1, pageNum);
         pageSize = Math.max(1, pageSize);
-        if (!sortField.equals("created_at") && !sortField.equals("hot")) {
+        if (!sortField.equals("created_at") && !sortField.equals("likes")) {
             sortField = "created_at";
         }
         Page<Comment> page = new Page<>(pageNum, pageSize);
@@ -80,7 +85,7 @@ public class CommentController {
                                       @RequestParam(value = "sortField", defaultValue = "created_at") String sortField) {
         pageNum = Math.max(1, pageNum);
         pageSize = Math.max(1, pageSize);
-        if (!sortField.equals("created_at") && !sortField.equals("hot")) {
+        if (!sortField.equals("created_at") && !sortField.equals("likes")) {
             sortField = "created_at";
         }
         Page<Comment> page = new Page<>(pageNum, pageSize);
@@ -90,6 +95,7 @@ public class CommentController {
         return Result.ok("查询成功")
                 .setData(commentService.page(page, queryWrapper));
     }
+
     @SaCheckRole("admin")
     @GetMapping("/list")
     public Result getComments(@RequestParam(value = "pageNum", defaultValue = "1") Integer pageNum,
@@ -101,7 +107,7 @@ public class CommentController {
                               @RequestParam(value = "sortOrder", defaultValue = "desc") String sortOrder) {
         pageNum = Math.max(1, pageNum);
         pageSize = Math.max(1, pageSize);
-        if (!sortField.equals("created_at") && !sortField.equals("hot") && !sortField.equals("star") && !sortField.equals("like")) {
+        if (!sortField.equals("created_at") && !sortField.equals("likes") && !sortField.equals("star")) {
             sortField = "created_at";
         }
         if (!sortOrder.equals("desc") && !sortOrder.equals("asc")) {
@@ -124,7 +130,7 @@ public class CommentController {
             return Result.error(Objects.requireNonNull(bindingResult.getFieldError()).getDefaultMessage());
         }
         Comment comment = modelMapper.map(commentDTO, Comment.class);
-        if (commentService.getOne(new QueryWrapper<Comment>().eq("book_id", comment.getBookId())) == null) {
+        if (bookService.getOne(new QueryWrapper<Book>().eq("id", comment.getBookId())) == null) {
             return Result.error("书籍不存在");
         }
         if (commentService.getOne(new QueryWrapper<Comment>().eq("user_id", StpUtil.getLoginIdAsLong()).eq("book_id", comment.getBookId())) != null) {
@@ -137,6 +143,25 @@ public class CommentController {
             return Result.error("添加失败");
         }
     }
+//    @PutMapping
+//    public Result likeComment(@Valid @RequestBody CommentDTO commentDTO, BindingResult bindingResult) {
+//        if (bindingResult.hasErrors()) {
+//            return Result.error(Objects.requireNonNull(bindingResult.getFieldError()).getDefaultMessage());
+//        }
+//        Comment comment = commentService.getById(commentDTO.getId());
+//        if (comment == null) {
+//            return Result.error("评论不存在");
+//        }
+//        if (commentService.getOne(new QueryWrapper<Comment>().eq("user_id", StpUtil.getLoginIdAsLong()).eq("book_id", comment.getBookId())) != null) {
+//            return Result.error("您已经评论过了");
+//        }
+//        comment.setLikes(comment.getLikes() + 1);
+//        if (commentService.updateById(comment)) {
+//            return Result.ok("点赞成功");
+//        } else {
+//            return Result.error("点赞失败");
+//        }
+//    }
 
     @DeleteMapping("/{id}")
     public Result deleteComment(@PathVariable Long id) {
