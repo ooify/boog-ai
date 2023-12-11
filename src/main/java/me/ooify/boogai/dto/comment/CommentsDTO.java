@@ -16,5 +16,6 @@ public class CommentsDTO {
     private CommentUserDTO user;
     private String content;
     private Integer likes;
+    private Boolean isLiked;
     private Date createdAt;
 }

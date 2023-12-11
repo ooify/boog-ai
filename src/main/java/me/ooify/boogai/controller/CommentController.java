@@ -7,12 +7,15 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 import me.ooify.boogai.dto.comment.CommentDTO;
+import me.ooify.boogai.dto.comment.CommentLikeDTO;
 import me.ooify.boogai.dto.comment.CommentsDTO;
 import me.ooify.boogai.dto.user.CommentUserDTO;
 import me.ooify.boogai.entity.Book;
 import me.ooify.boogai.entity.Comment;
 
+import me.ooify.boogai.entity.CommentLike;
 import me.ooify.boogai.service.impl.BookServiceImpl;
+import me.ooify.boogai.service.impl.CommentLikeServiceImpl;
 import me.ooify.boogai.service.impl.CommentServiceImpl;
 import me.ooify.boogai.service.impl.UserServiceImpl;
 import me.ooify.boogai.utils.Result;
@@ -45,6 +48,8 @@ public class CommentController {
     @Resource
     private BookServiceImpl bookService;
     @Resource
+    private CommentLikeServiceImpl commentLikeService;
+    @Resource
     private ModelMapper modelMapper;
 
 
@@ -73,6 +78,9 @@ public class CommentController {
         commentPage.convert(comment -> {
             CommentsDTO commentsDTO = modelMapper.map(comment, CommentsDTO.class);
             commentsDTO.setUser(modelMapper.map(userService.getById(comment.getUserId()), CommentUserDTO.class));
+            if (StpUtil.isLogin()) {
+                commentsDTO.setIsLiked(commentLikeService.getOne(new QueryWrapper<CommentLike>().eq("user_id", StpUtil.getLoginIdAsLong()).eq("comment_id", comment.getId())) != null);
+            }
             return commentsDTO;
         });
         return Result.ok("查询成功")
@@ -143,26 +151,32 @@ public class CommentController {
             return Result.error("添加失败");
         }
     }
-//    @PutMapping
-//    public Result likeComment(@Valid @RequestBody CommentDTO commentDTO, BindingResult bindingResult) {
-//        if (bindingResult.hasErrors()) {
-//            return Result.error(Objects.requireNonNull(bindingResult.getFieldError()).getDefaultMessage());
-//        }
-//        Comment comment = commentService.getById(commentDTO.getId());
-//        if (comment == null) {
-//            return Result.error("评论不存在");
-//        }
-//        if (commentService.getOne(new QueryWrapper<Comment>().eq("user_id", StpUtil.getLoginIdAsLong()).eq("book_id", comment.getBookId())) != null) {
-//            return Result.error("您已经评论过了");
-//        }
-//        comment.setLikes(comment.getLikes() + 1);
-//        if (commentService.updateById(comment)) {
-//            return Result.ok("点赞成功");
-//        } else {
-//            return Result.error("点赞失败");
-//        }
-//    }
 
+    @PutMapping("/like")
+    public Result likeComment(@Valid @RequestBody CommentLikeDTO commentLikeDTO, BindingResult bindingResult) {
+        if (bindingResult.hasErrors()) {
+            return Result.error(Objects.requireNonNull(bindingResult.getFieldError()).getDefaultMessage());
+        }
+        CommentLike commentLike = modelMapper.map(commentLikeDTO, CommentLike.class);
+        if (commentService.getOne(new QueryWrapper<Comment>().eq("id", commentLike.getCommentId())) == null) {
+            return Result.error("评论不存在");
+        }
+        if (commentLikeDTO.getIsLike() == 0) {
+            if (commentLikeService.remove(new QueryWrapper<CommentLike>().eq("user_id", commentLike.getUserId()).eq("comment_id", commentLike.getCommentId()))) {
+                return Result.ok("取消点赞成功");
+            } else {
+                return Result.error("取消点赞失败");
+            }
+        } else {
+            if (commentLikeService.save(commentLike)) {
+                return Result.ok("点赞成功");
+            } else {
+                return Result.error("点赞失败");
+            }
+        }
+    }
+
+    @SaCheckRole("admin")
     @DeleteMapping("/{id}")
     public Result deleteComment(@PathVariable Long id) {
         if (commentService.removeById(id)) {

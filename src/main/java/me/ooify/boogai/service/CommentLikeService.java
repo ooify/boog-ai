@@ -1,7 +1,7 @@
 package me.ooify.boogai.service;
 
-import com.baomidou.mybatisplus.extension.service.IService;
 import me.ooify.boogai.entity.CommentLike;
+import com.baomidou.mybatisplus.extension.service.IService;
 
 /**
  * <p>
