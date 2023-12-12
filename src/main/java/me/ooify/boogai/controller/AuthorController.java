@@ -48,7 +48,7 @@ public class AuthorController {
     @GetMapping
     public Result getAllAuthors(@RequestParam(value = "pageNum", defaultValue = "1") Integer pageNum,
                                 @RequestParam(value = "pageSize", defaultValue = "10") Integer pageSize,
-                                @RequestParam(value = "AuthorName", required = false) String AuthorName,
+                                @RequestParam(value = "authorName", required = false) String authorName,
                                 @RequestParam(value = "sortField", defaultValue = "created_at") String sortField,
                                 @RequestParam(value = "sortOrder", defaultValue = "desc") String sortOrder) {
         pageNum = Math.max(pageNum, 1);
@@ -61,7 +61,7 @@ public class AuthorController {
         }
         Page<Author> page = new Page<>(pageNum, pageSize);
         QueryWrapper<Author> queryWrapper = new QueryWrapper<>();
-        queryWrapper.like(AuthorName != null, "name", AuthorName)
+        queryWrapper.like(authorName != null, "name", authorName)
                 .orderByAsc("asc".equalsIgnoreCase(sortOrder), sortField)
                 .orderByDesc("desc".equalsIgnoreCase(sortOrder), sortField);
 
