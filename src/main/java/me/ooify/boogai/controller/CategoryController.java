@@ -6,10 +6,8 @@ import jakarta.annotation.Resource;
 import me.ooify.boogai.entity.Category;
 import me.ooify.boogai.service.impl.CategoryServiceImpl;
 import me.ooify.boogai.utils.Result;
-import org.modelmapper.ModelMapper;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.stereotype.Controller;
 
 /**
  * <p>
@@ -58,9 +56,8 @@ public class CategoryController {
     }
 
     @SaCheckRole("admin")
-    @PutMapping("/{id}")
-    public Result updateCategory(@PathVariable Long id, @RequestBody Category category) {
-        category.setId(id);
+    @PutMapping
+    public Result updateCategory(@RequestBody Category category) {
         categoryService.updateById(category);
         return Result.ok("更新成功")
                 .setData(category);

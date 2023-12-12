@@ -26,8 +26,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Objects;
 
-import static net.sf.jsqlparser.parser.feature.Feature.comment;
-
 
 /**
  * <p>
@@ -158,6 +156,7 @@ public class CommentController {
             return Result.error(Objects.requireNonNull(bindingResult.getFieldError()).getDefaultMessage());
         }
         CommentLike commentLike = modelMapper.map(commentLikeDTO, CommentLike.class);
+        commentLike.setUserId(StpUtil.getLoginIdAsLong());
         if (commentService.getOne(new QueryWrapper<Comment>().eq("id", commentLike.getCommentId())) == null) {
             return Result.error("评论不存在");
         }
