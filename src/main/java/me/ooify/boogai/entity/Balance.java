@@ -33,5 +33,4 @@ public class Balance {
 
     private Date createdAt;
 
-    private Date updatedAt;
 }

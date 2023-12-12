@@ -25,6 +25,7 @@ import org.springframework.stereotype.Controller;
 public class CategoryController {
     @Resource
     private CategoryServiceImpl categoryService;
+
     @GetMapping("/{id}")
     public Result getCategoryById(@PathVariable Long id) {
         return Result.ok("查询成功")
@@ -32,9 +33,8 @@ public class CategoryController {
     }
 
     @GetMapping
-    public Result getAllCategories(
-            @RequestParam(value = "sortField", defaultValue = "created_at") String sortField,
-            @RequestParam(value = "sortOrder", defaultValue = "desc") String sortOrder) {
+    public Result getAllCategories(@RequestParam(value = "sortField", defaultValue = "created_at") String sortField,
+                                   @RequestParam(value = "sortOrder", defaultValue = "desc") String sortOrder) {
         if (!sortField.equals("created_at") && !sortField.equals("hot")) {
             sortField = "created_at";
         }

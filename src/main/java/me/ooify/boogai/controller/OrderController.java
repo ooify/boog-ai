@@ -11,14 +11,9 @@ import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 import me.ooify.boogai.dto.order.OrderDTO;
 
-import me.ooify.boogai.entity.Address;
-import me.ooify.boogai.entity.Order;
+import me.ooify.boogai.entity.*;
 
-import me.ooify.boogai.entity.OrderItem;
-import me.ooify.boogai.service.impl.AddressServiceImpl;
-import me.ooify.boogai.service.impl.BookServiceImpl;
-import me.ooify.boogai.service.impl.OrderItemServiceImpl;
-import me.ooify.boogai.service.impl.OrderServiceImpl;
+import me.ooify.boogai.service.impl.*;
 import me.ooify.boogai.utils.Result;
 import org.modelmapper.ModelMapper;
 import org.springframework.transaction.annotation.Transactional;
@@ -46,9 +41,13 @@ public class OrderController {
     @Resource
     private BookServiceImpl bookService;
     @Resource
+    private UserServiceImpl userService;
+    @Resource
     private OrderItemServiceImpl orderItemService;
     @Resource
     private AddressServiceImpl addressService;
+    @Resource
+    private BalanceServiceImpl balanceService;
 
     @SaCheckRole("admin")
     @GetMapping("/{id}")
@@ -134,6 +133,32 @@ public class OrderController {
             orderItemService.save(orderItem);
         });
         return Result.ok("新增成功");
+    }
+
+    @PostMapping("/pay")
+    public Result payOrder(@RequestParam(value = "orderId") Long orderId) {
+        Order order = orderService.getOne(new QueryWrapper<Order>().eq("id", orderId).eq("user_id", StpUtil.getLoginIdAsLong()));
+        if (order == null) {
+            return Result.error("订单不存在");
+        }
+        if (order.getStatus() != 0) {
+            return Result.error("订单已支付");
+        }
+        User user = userService.getById(StpUtil.getLoginIdAsLong());
+        if (user.getBalance() < order.getTotalAmount()) {
+            return Result.error("余额不足");
+        } else {
+            Balance balance = new Balance();
+            balance.setUserId(StpUtil.getLoginIdAsLong());
+            balance.setChangeAmount(-order.getTotalAmount());
+            balance.setChangeType("购买图书");
+            balance.setBalance(user.getBalance() - order.getTotalAmount());
+            balanceService.save(balance);
+            order.setStatus(1);
+            orderService.updateById(order);
+            return Result.ok("支付成功");
+        }
+
     }
 
     @SaCheckRole("admin")

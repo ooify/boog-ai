@@ -18,6 +18,7 @@ public class UserInfoDTO {
     private String email;
     private String phonenumber;
     private String avatar;
+    private Double balance;
     private Date createdAt;
     private Date updatedAt;
 }
