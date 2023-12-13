@@ -1,6 +1,7 @@
 package me.ooify.boogai.controller;
 
 import cn.dev33.satoken.annotation.SaCheckRole;
+import cn.dev33.satoken.annotation.SaIgnore;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -8,7 +9,7 @@ import jakarta.annotation.Resource;
 import me.ooify.boogai.dto.author.AuthorDTO;
 import me.ooify.boogai.dto.book.BooksDTO;
 import me.ooify.boogai.entity.Book;
-import me.ooify.boogai.entity.Category;
+
 import me.ooify.boogai.service.impl.AuthorServiceImpl;
 import me.ooify.boogai.service.impl.BookServiceImpl;
 import me.ooify.boogai.service.impl.CategoryServiceImpl;
@@ -16,7 +17,7 @@ import me.ooify.boogai.utils.Result;
 import org.modelmapper.ModelMapper;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.stereotype.Controller;
+
 
 /**
  * <p>
@@ -40,6 +41,7 @@ public class BookController {
     @Resource
     private ModelMapper modelMapper;
 
+    @SaIgnore
     @GetMapping("/{id}")
     public Result getBookById(@PathVariable Long id) {
         Book book = bookService.getById(id);
@@ -50,6 +52,7 @@ public class BookController {
                 .setData(bookDTO);
     }
 
+    @SaIgnore
     @GetMapping
     public Result getBooks(@RequestParam(value = "pageNum", defaultValue = "1") Integer pageNum,
                            @RequestParam(value = "pageSize", defaultValue = "10") Integer pageSize,
