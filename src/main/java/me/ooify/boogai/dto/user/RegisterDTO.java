@@ -3,9 +3,11 @@ package me.ooify.boogai.dto.user;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.validator.constraints.Range;
 
 @Data
 @NoArgsConstructor
@@ -19,7 +21,9 @@ public class RegisterDTO {
     @NotNull(message = "密码不能为空")
     @Pattern(regexp = "^.{6,20}$", message = "密码格式不正确，应为长度6-20位的任意字符")
     private String password;
+    @Size(min = 2, max = 20, message = "昵称长度应为2-20位")
     private String nickName;
+    @Range(min = 0, max = 1, message = "性别应为0或1")
     private Integer sex;
     @NotNull(message = "邮箱不能为空")
     @Email(message = "邮箱格式不正确")

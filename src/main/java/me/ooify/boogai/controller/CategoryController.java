@@ -1,6 +1,7 @@
 package me.ooify.boogai.controller;
 
 import cn.dev33.satoken.annotation.SaCheckRole;
+import cn.dev33.satoken.annotation.SaIgnore;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import jakarta.annotation.Resource;
 import me.ooify.boogai.entity.Category;
@@ -29,7 +30,7 @@ public class CategoryController {
         return Result.ok("查询成功")
                 .setData(categoryService.getById(id));
     }
-
+    @SaIgnore
     @GetMapping
     public Result getAllCategories(@RequestParam(value = "sortField", defaultValue = "created_at") String sortField,
                                    @RequestParam(value = "sortOrder", defaultValue = "desc") String sortOrder) {

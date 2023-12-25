@@ -1,6 +1,7 @@
 package me.ooify.boogai.controller;
 
 import cn.dev33.satoken.annotation.SaCheckRole;
+import cn.dev33.satoken.annotation.SaIgnore;
 import cn.dev33.satoken.stp.StpUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -58,6 +59,7 @@ public class CommentController {
                 .setData(commentService.getById(id));
     }
 
+    @SaIgnore
     @GetMapping("/book")
     public Result getCommentsByBookId(@RequestParam(value = "pageNum", defaultValue = "1") Integer pageNum,
                                       @RequestParam(value = "pageSize", defaultValue = "10") Integer pageSize,
@@ -73,11 +75,14 @@ public class CommentController {
         queryWrapper.eq("book_id", bookId);
         queryWrapper.orderByDesc(sortField);
         Page<Comment> commentPage = commentService.page(page, queryWrapper);
+        System.out.println(commentPage.getRecords().get(0));
         commentPage.convert(comment -> {
             CommentsDTO commentsDTO = modelMapper.map(comment, CommentsDTO.class);
             commentsDTO.setUser(modelMapper.map(userService.getById(comment.getUserId()), CommentUserDTO.class));
             if (StpUtil.isLogin()) {
                 commentsDTO.setIsLiked(commentLikeService.getOne(new QueryWrapper<CommentLike>().eq("user_id", StpUtil.getLoginIdAsLong()).eq("comment_id", comment.getId())) != null);
+            } else {
+                commentsDTO.setIsLiked(false);
             }
             return commentsDTO;
         });

@@ -50,7 +50,6 @@ public class LoginController {
             return Result.error("用户不存在/密码错误");
         }
     }
-
     @PostMapping("/logout")
     public Result logout() {
         StpUtil.logoutByTokenValue(StpUtil.getTokenValue());
@@ -82,5 +81,12 @@ public class LoginController {
         }
 
     }
+//    @PostMapping("/register/code")
+//    public Result getRegisterCode(@Valid @RequestBody RegisterCodeDTO registerCodeDTO, BindingResult bindingResult) {
+//        if (bindingResult.hasErrors()) {
+//            return Result.error(Objects.requireNonNull(bindingResult.getFieldError()).getDefaultMessage());
+//        }
+//
+//    }
 
 }
