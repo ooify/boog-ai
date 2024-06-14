@@ -15,7 +15,7 @@ public class Code {
     @TableId(value = "id", type = IdType.AUTO)
     private Long id;
     private String email;
-    private String code;
+    private Integer code;
     private Date createdAt;
 
 }

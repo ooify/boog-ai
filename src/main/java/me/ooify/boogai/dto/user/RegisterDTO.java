@@ -1,9 +1,6 @@
 package me.ooify.boogai.dto.user;
 
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -29,8 +26,11 @@ public class RegisterDTO {
     @Email(message = "邮箱格式不正确")
     private String email;
     //要求不为空，格式为1开头的11位数字
-    @NotNull(message = "手机号不能为空")
     @Pattern(regexp = "^1\\d{10}$", message = "手机号格式不正确")
     private String phonenumber;
+    //要求不为空，格式为6位数字
+    @NotNull(message = "验证码不能为空")
+    @Digits(integer = 6, fraction = 0, message = "验证码格式不正确")
+    private Integer code;
 
 }
