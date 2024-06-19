@@ -53,6 +53,9 @@ public class UserController {
     public Result getUserInfo() {
         User user = userService.getOne(new QueryWrapper<User>().eq("id", StpUtil.getLoginIdAsLong()));
         UserInfoDTO userInfo = modelMapper.map(user, UserInfoDTO.class);
+        if (user.getStatus() == 2) {
+            userInfo.setRoles(new String[]{"R_SUPER"});
+        }
         return Result.ok("查询成功")
                 .setData(userInfo);
     }
@@ -93,6 +96,7 @@ public class UserController {
     @SaCheckRole("admin")
     @PostMapping
     public Result createUser(@RequestBody User user) {
+        System.out.println(user);
         if (userService.save(user)) {
             return Result.ok("新增成功");
         } else {

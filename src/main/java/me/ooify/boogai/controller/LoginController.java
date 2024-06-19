@@ -26,6 +26,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 
 @Transactional
@@ -54,8 +56,11 @@ public class LoginController {
         User u = userService.getOne(queryWrapper);
         if (u != null) {
             StpUtil.login(u.getId());
-            return Result.ok("登录成功")
-                    .setToken(StpUtil.getTokenValue());
+            Map<String, Object> map = new HashMap<>();
+            map.put("token", StpUtil.getTokenValue());
+            return Result.ok("登录成功").setData(map);
+//            return Result.ok("登录成功")
+//                    .setToken(StpUtil.getTokenValue());
         } else {
             return Result.error("用户不存在/密码错误");
         }

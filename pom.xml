@@ -83,7 +83,18 @@
             <artifactId>hutool-extra</artifactId>
             <version>5.8.16</version>
         </dependency>
-
+        <!--向量数据库-->
+        <dependency>
+            <groupId>io.milvus</groupId>
+            <artifactId>milvus-sdk-java</artifactId>
+            <version>2.4.1</version>
+        </dependency>
+        <!--ali oss-->
+        <dependency>
+            <groupId>com.aliyun.oss</groupId>
+            <artifactId>aliyun-sdk-oss</artifactId>
+            <version>3.17.4</version>
+        </dependency>
     </dependencies>
 
     <build>

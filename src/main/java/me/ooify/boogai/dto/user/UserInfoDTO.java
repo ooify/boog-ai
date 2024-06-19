@@ -21,4 +21,5 @@ public class UserInfoDTO {
     private Double balance;
     private Date createdAt;
     private Date updatedAt;
+    private String[] roles;
 }
