@@ -1,0 +1,12 @@
+datasource:
+  username: root
+  password: 1234
+  driver-class-name: com.mysql.cj.jdbc.Driver
+  url: jdbc:mysql://localhost:3306/boog-ai?useSSL=false&characterEncoding=utf8
+image:
+  avatar:
+    path: /www/xxxx
+    file: file:/www/xxxx
+  bookcover:
+    path: /www/xxxx
+    file: file:/www/xxxx

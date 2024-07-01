@@ -32,3 +32,5 @@ build/
 ### VS Code ###
 .vscode/
 mail.setting
+application-prod.yml
+application-dev.yml
