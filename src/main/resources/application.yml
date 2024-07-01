@@ -1,0 +1,35 @@
+spring:
+  profiles:
+    active: dev
+  main:
+    banner-mode: off
+  mvc:
+    throw-exception-if-no-handler-found: true
+  web:
+    resources:
+      add-mappings: false
+
+sa-token:
+  is-read-cookie: false
+  is-read-body: false
+  is-write-header: false
+  is-print: false
+  token-name: Authorization
+  token-prefix: Bearer
+  timeout: 86400
+  active-timeout: -1
+  is-concurrent: true
+  is-share: true
+  token-style: random-128
+  is-log: false
+  jwt-secret-key: jonsanme
+
+mybatis-plus:
+  configuration:
+    map-underscore-to-camel-case: true
+  global-config:
+    banner: false
+
+
+
+

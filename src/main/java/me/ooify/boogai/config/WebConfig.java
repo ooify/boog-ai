@@ -43,14 +43,6 @@ public class WebConfig implements WebMvcConfigurer {
                 .exposedHeaders(HttpHeaders.AUTHORIZATION, HttpHeaders.CONTENT_TYPE, "accessToken", "CorrelationId", "source")
                 .maxAge(4800);
     }
-//    @Override
-//    public void addCorsMappings(CorsRegistry registry) {
-//        registry.addMapping("/**")
-//                .allowedOriginPatterns("*")
-//                .allowedMethods("*")
-//                .allowCredentials(true)
-//                .maxAge(3600);
-//    }
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {

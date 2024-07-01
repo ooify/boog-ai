@@ -17,8 +17,6 @@ public class Result {
 
     private Object data;
 
-    private String token;
-
     private String error;
 
 
@@ -37,10 +35,6 @@ public class Result {
         return this;
     }
 
-    public Result setToken(String token) {
-        this.token = token;
-        return this;
-    }
 
     public Result setError(String error) {
         this.error = error;
@@ -48,19 +42,19 @@ public class Result {
     }
 
     public static Result ok() {
-        return new Result(CODE_SUCCESS, "ok", null, null, null);
+        return new Result(CODE_SUCCESS, "ok", null, null);
     }
 
     public static Result ok(String msg) {
-        return new Result(CODE_SUCCESS, msg, null, null, null);
+        return new Result(CODE_SUCCESS, msg, null, null);
     }
 
     public static Result error() {
-        return new Result(CODE_ERROR, "error", null, null, null);
+        return new Result(CODE_ERROR, "error", null, null);
     }
 
     public static Result error(String msg) {
-        return new Result(CODE_ERROR, msg, null, null, null);
+        return new Result(CODE_ERROR, msg, null, null);
     }
 
 
