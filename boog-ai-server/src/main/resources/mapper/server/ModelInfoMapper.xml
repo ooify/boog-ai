@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="me.jonsan.server.mapper.ModelInfoMapper">
+    
+    <resultMap type="ModelInfo" id="ModelInfoResult">
+        <result property="modelId"    column="model_id"    />
+        <result property="modelCode"    column="model_code"    />
+        <result property="modelName"    column="model_name"    />
+        <result property="modelVersion"    column="model_version"    />
+        <result property="provider"    column="provider"    />
+        <result property="modelType"    column="model_type"    />
+        <result property="description"    column="description"    />
+        <result property="apiEndpoint"    column="api_endpoint"    />
+        <result property="tag"    column="tag"    />
+        <result property="status"    column="status"    />
+        <result property="isDefault"    column="is_default"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateTime"    column="update_time"    />
+    </resultMap>
+
+    <sql id="selectModelInfoVo">
+        select model_id, model_code, model_name, model_version, provider, model_type, description, api_endpoint, tag, status, is_default, create_time, update_time from boog_ai_model_info
+    </sql>
+
+    <select id="selectModelInfoList" parameterType="ModelInfo" resultMap="ModelInfoResult">
+        <include refid="selectModelInfoVo"/>
+        <where>  
+            <if test="modelCode != null  and modelCode != ''"> and model_code = #{modelCode}</if>
+            <if test="modelName != null  and modelName != ''"> and model_name like concat('%', #{modelName}, '%')</if>
+            <if test="provider != null  and provider != ''"> and provider like concat('%', #{provider}, '%')</if>
+            <if test="modelType != null  and modelType != ''"> and model_type = #{modelType}</if>
+            <if test="tag != null  and tag != ''"> and tag = #{tag}</if>
+            <if test="status != null  and status != ''"> and status = #{status}</if>
+            <if test="isDefault != null  and isDefault != ''"> and is_default = #{isDefault}</if>
+            <if test="params.beginCreateTime != null and params.beginCreateTime != '' and params.endCreateTime != null and params.endCreateTime != ''"> and create_time between #{params.beginCreateTime} and #{params.endCreateTime}</if>
+        </where>
+    </select>
+    
+    <select id="selectModelInfoByModelId" parameterType="Long" resultMap="ModelInfoResult">
+        <include refid="selectModelInfoVo"/>
+        where model_id = #{modelId}
+    </select>
+
+    <insert id="insertModelInfo" parameterType="ModelInfo" useGeneratedKeys="true" keyProperty="modelId">
+        insert into boog_ai_model_info
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="modelCode != null and modelCode != ''">model_code,</if>
+            <if test="modelName != null and modelName != ''">model_name,</if>
+            <if test="modelVersion != null and modelVersion != ''">model_version,</if>
+            <if test="provider != null and provider != ''">provider,</if>
+            <if test="modelType != null and modelType != ''">model_type,</if>
+            <if test="description != null">description,</if>
+            <if test="apiEndpoint != null and apiEndpoint != ''">api_endpoint,</if>
+            <if test="tag != null and tag != ''">tag,</if>
+            <if test="status != null">status,</if>
+            <if test="isDefault != null">is_default,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateTime != null">update_time,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="modelCode != null and modelCode != ''">#{modelCode},</if>
+            <if test="modelName != null and modelName != ''">#{modelName},</if>
+            <if test="modelVersion != null and modelVersion != ''">#{modelVersion},</if>
+            <if test="provider != null and provider != ''">#{provider},</if>
+            <if test="modelType != null and modelType != ''">#{modelType},</if>
+            <if test="description != null">#{description},</if>
+            <if test="apiEndpoint != null and apiEndpoint != ''">#{apiEndpoint},</if>
+            <if test="tag != null and tag != ''">#{tag},</if>
+            <if test="status != null">#{status},</if>
+            <if test="isDefault != null">#{isDefault},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+         </trim>
+    </insert>
+
+    <update id="updateModelInfo" parameterType="ModelInfo">
+        update boog_ai_model_info
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="modelCode != null and modelCode != ''">model_code = #{modelCode},</if>
+            <if test="modelName != null and modelName != ''">model_name = #{modelName},</if>
+            <if test="modelVersion != null and modelVersion != ''">model_version = #{modelVersion},</if>
+            <if test="provider != null and provider != ''">provider = #{provider},</if>
+            <if test="modelType != null and modelType != ''">model_type = #{modelType},</if>
+            <if test="description != null">description = #{description},</if>
+            <if test="apiEndpoint != null and apiEndpoint != ''">api_endpoint = #{apiEndpoint},</if>
+            <if test="tag != null and tag != ''">tag = #{tag},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="isDefault != null">is_default = #{isDefault},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+        </trim>
+        where model_id = #{modelId}
+    </update>
+
+    <delete id="deleteModelInfoByModelId" parameterType="Long">
+        delete from boog_ai_model_info where model_id = #{modelId}
+    </delete>
+
+    <delete id="deleteModelInfoByModelIds" parameterType="String">
+        delete from boog_ai_model_info where model_id in 
+        <foreach item="modelId" collection="array" open="(" separator="," close=")">
+            #{modelId}
+        </foreach>
+    </delete>
+</mapper>

@@ -53,7 +53,10 @@
             <groupId>me.jonsan</groupId>
             <artifactId>boog-ai-generator</artifactId>
         </dependency>
-
+        <dependency>
+            <groupId>me.jonsan</groupId>
+            <artifactId>boog-ai-server</artifactId>
+        </dependency>
     </dependencies>
 
     <build>

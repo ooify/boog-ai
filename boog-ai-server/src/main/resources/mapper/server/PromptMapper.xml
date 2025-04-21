@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="me.jonsan.server.mapper.PromptMapper">
+    
+    <resultMap type="Prompt" id="PromptResult">
+        <result property="promptId"    column="prompt_id"    />
+        <result property="promptName"    column="prompt_name"    />
+        <result property="promptText"    column="prompt_text"    />
+        <result property="description"    column="description"    />
+        <result property="modelId"    column="model_id"    />
+        <result property="tag"    column="tag"    />
+        <result property="status"    column="status"    />
+        <result property="isDefault"    column="is_default"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateTime"    column="update_time"    />
+    </resultMap>
+
+    <sql id="selectPromptVo">
+        select prompt_id, prompt_name, prompt_text, description, model_id, tag, status, is_default, create_time, update_time from boog_ai_prompt
+    </sql>
+
+    <select id="selectPromptList" parameterType="Prompt" resultMap="PromptResult">
+        <include refid="selectPromptVo"/>
+        <where>  
+            <if test="promptName != null  and promptName != ''"> and prompt_name like concat('%', #{promptName}, '%')</if>
+            <if test="modelId != null "> and model_id = #{modelId}</if>
+            <if test="tag != null  and tag != ''"> and tag = #{tag}</if>
+            <if test="status != null  and status != ''"> and status = #{status}</if>
+            <if test="isDefault != null  and isDefault != ''"> and is_default = #{isDefault}</if>
+            <if test="params.beginCreateTime != null and params.beginCreateTime != '' and params.endCreateTime != null and params.endCreateTime != ''"> and create_time between #{params.beginCreateTime} and #{params.endCreateTime}</if>
+        </where>
+    </select>
+    
+    <select id="selectPromptByPromptId" parameterType="Long" resultMap="PromptResult">
+        <include refid="selectPromptVo"/>
+        where prompt_id = #{promptId}
+    </select>
+
+    <insert id="insertPrompt" parameterType="Prompt" useGeneratedKeys="true" keyProperty="promptId">
+        insert into boog_ai_prompt
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="promptName != null and promptName != ''">prompt_name,</if>
+            <if test="promptText != null and promptText != ''">prompt_text,</if>
+            <if test="description != null">description,</if>
+            <if test="modelId != null">model_id,</if>
+            <if test="tag != null and tag != ''">tag,</if>
+            <if test="status != null">status,</if>
+            <if test="isDefault != null">is_default,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateTime != null">update_time,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="promptName != null and promptName != ''">#{promptName},</if>
+            <if test="promptText != null and promptText != ''">#{promptText},</if>
+            <if test="description != null">#{description},</if>
+            <if test="modelId != null">#{modelId},</if>
+            <if test="tag != null and tag != ''">#{tag},</if>
+            <if test="status != null">#{status},</if>
+            <if test="isDefault != null">#{isDefault},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+         </trim>
+    </insert>
+
+    <update id="updatePrompt" parameterType="Prompt">
+        update boog_ai_prompt
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="promptName != null and promptName != ''">prompt_name = #{promptName},</if>
+            <if test="promptText != null and promptText != ''">prompt_text = #{promptText},</if>
+            <if test="description != null">description = #{description},</if>
+            <if test="modelId != null">model_id = #{modelId},</if>
+            <if test="tag != null and tag != ''">tag = #{tag},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="isDefault != null">is_default = #{isDefault},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+        </trim>
+        where prompt_id = #{promptId}
+    </update>
+
+    <delete id="deletePromptByPromptId" parameterType="Long">
+        delete from boog_ai_prompt where prompt_id = #{promptId}
+    </delete>
+
+    <delete id="deletePromptByPromptIds" parameterType="String">
+        delete from boog_ai_prompt where prompt_id in 
+        <foreach item="promptId" collection="array" open="(" separator="," close=")">
+            #{promptId}
+        </foreach>
+    </delete>
+</mapper>
