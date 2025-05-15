@@ -1,4 +1,4 @@
-package me.jonsan.server.controller;
+package me.jonsan.web.controller.server;
 
 import java.util.List;
 import jakarta.servlet.http.HttpServletResponse;
