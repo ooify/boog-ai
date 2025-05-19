@@ -18,13 +18,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 
 @RestController
@@ -47,6 +50,130 @@ public class AIChatController {
 
     @Value("${zilliz.token}")
     private String zillizToken;
+
+    @Anonymous
+    @PostMapping("/search/img")
+    public AjaxResult imgSearch(@RequestParam("file") MultipartFile img) throws IOException {
+        // Get default image model
+        ModelInfo imageModel = getDefaultModel("2");
+        if (imageModel == null) {
+            return AjaxResult.error("没有可用的图像模型");
+        }
+
+        // Get default prompt for image model
+        Prompt imagePrompt = getDefaultPrompt(imageModel.getModelId(), "1");
+        if (imagePrompt == null) {
+            return AjaxResult.error("没有可用的图像提示词");
+        }
+
+        // Get secret key
+        SecretKey imageModelSecretKey = getSecretKey(imageModel.getModelId());
+        if (imageModelSecretKey == null) {
+            return AjaxResult.error("没有可用的密钥");
+        }
+
+        // Convert image to base64
+        String base64Image = Base64.getEncoder().encodeToString(img.getBytes());
+        String contentType = img.getContentType();
+        String imageUrl;
+        
+        // Set the correct content type for base64
+        if (contentType != null) {
+            switch (contentType.toLowerCase()) {
+                case "image/png":
+                    imageUrl = "data:image/png;base64," + base64Image;
+                    break;
+                case "image/jpeg":
+                case "image/jpg":
+                    imageUrl = "data:image/jpeg;base64," + base64Image;
+                    break;
+                case "image/webp":
+                    imageUrl = "data:image/webp;base64," + base64Image;
+                    break;
+                default:
+                    // Default to JPEG if content type is not recognized
+                    imageUrl = "data:image/jpeg;base64," + base64Image;
+            }
+        } else {
+            // Default to JPEG if content type is null
+            imageUrl = "data:image/jpeg;base64," + base64Image;
+        }
+
+        // Prepare request body
+        JSONObject requestBody = new JSONObject();
+        requestBody.put("model", imageModel.getModelCode());
+        requestBody.put("stream", false);
+
+        JSONArray messages = new JSONArray();
+        
+        // Add system message
+        JSONObject systemMessage = new JSONObject();
+        systemMessage.put("role", "system");
+        JSONArray systemContent = new JSONArray();
+        JSONObject systemText = new JSONObject();
+        systemText.put("type", "text");
+        systemText.put("text", imagePrompt.getPromptText());
+        systemContent.add(systemText);
+        systemMessage.put("content", systemContent);
+        messages.add(systemMessage);
+
+        // Add user message with image
+        JSONObject userMessage = new JSONObject();
+        userMessage.put("role", "user");
+        JSONArray userContent = new JSONArray();
+        JSONObject imageContent = new JSONObject();
+        imageContent.put("type", "image_url");
+        JSONObject imageUrlObj = new JSONObject();
+        imageUrlObj.put("url", imageUrl);
+        imageContent.put("image_url", imageUrlObj);
+        userContent.add(imageContent);
+        userMessage.put("content", userContent);
+        messages.add(userMessage);
+
+        requestBody.put("messages", messages);
+
+        // Send request to image model
+        OkHttpClient client = new OkHttpClient();
+        Request request = buildRequest(imageModel.getApiEndpoint(), requestBody, imageModelSecretKey);
+        Response response = client.newCall(request).execute();
+
+        if (!response.isSuccessful()) {
+            return AjaxResult.error("图像模型请求失败");
+        }
+
+        // Parse response to get generated title
+        JSONObject responseJson = JSON.parseObject(response.body().string());
+        String generatedTitle = responseJson.getJSONArray("choices")
+                .getJSONObject(0)
+                .getJSONObject("message")
+                .getString("content");
+
+        // Get embedding model
+        ModelInfo embeddingModel = getDefaultModel("3");
+        if (embeddingModel == null) {
+            return AjaxResult.error("没有可用的嵌入模型");
+        }
+
+        // Get title embedding
+        String titleEmbedding = getTitleEmbedding(client, embeddingModel, getSecretKey(embeddingModel.getModelId()), generatedTitle);
+        if (titleEmbedding == null) {
+            return AjaxResult.error("获取标题向量失败");
+        }
+
+        // Search similar books
+        JSONArray dataArray = searchSimilarBooks(titleEmbedding);
+        if (dataArray == null) {
+            return AjaxResult.error("搜索相似书籍失败");
+        }
+
+        // Extract book IDs
+        List<Long> bookIds = new ArrayList<>();
+        for (int i = 0; i < dataArray.size(); i++) {
+            bookIds.add(dataArray.getJSONObject(i).getLong("id"));
+        }
+        
+        return AjaxResult.success(bookIds);
+    }
 
     @Anonymous
     @PostMapping("/generate")
