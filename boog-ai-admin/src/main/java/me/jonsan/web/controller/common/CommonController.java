@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import me.jonsan.common.utils.file.AliOssUtil;
+//import me.jonsan.common.utils.file.AliOssUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,8 +36,8 @@ public class CommonController
     @Autowired
     private ServerConfig serverConfig;
 
-    @Autowired
-    private AliOssUtil aliOssUtil;
+//    @Autowired
+//    private AliOssUtil aliOssUtil;
 
     private static final String FILE_DELIMETER = ",";
 
@@ -167,12 +167,12 @@ public class CommonController
     /**
      * 上传oss
      */
-    @PostMapping("/upload/oss")
-    public AjaxResult uploadOss(MultipartFile file) throws Exception {
-        String url = aliOssUtil.upload(file,"test", "images/temp");
-        AjaxResult ajax = AjaxResult.success();
-        ajax.put("url", url);
-        ajax.put("fileName", file.getOriginalFilename());
-        return ajax;
-    }
+//    @PostMapping("/upload/oss")
+//    public AjaxResult uploadOss(MultipartFile file) throws Exception {
+//        String url = aliOssUtil.upload(file,"test", "images/temp");
+//        AjaxResult ajax = AjaxResult.success();
+//        ajax.put("url", url);
+//        ajax.put("fileName", file.getOriginalFilename());
+//        return ajax;
+//    }
 }
